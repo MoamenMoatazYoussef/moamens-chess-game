@@ -14,7 +14,7 @@ class Square extends Component {
     }
     render() {
         return (
-            <Col sm={3} style={{ 
+            <Col sm={1} style={{ 
                 width: SQUARE_SIDE_LENGTH,
                 height: SQUARE_SIDE_LENGTH, 
                 backgroundColor: this.state.color

@@ -1,6 +1,8 @@
 export const lightSquareColor = '#ccffcc';
 export const darkSquareColor = '#00e68a';
 
+export const ROW_COUNT = 8;
+export const COL_COUNT = 8;
 export const SQUARES_COUNT = 64;
 export const SQUARES_COUNT_PLUS_TRANSITIONS = 64 + (64/4);
 

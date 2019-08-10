@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import './board.css';
-import { Row, Col, Container } from 'react-bootstrap';
+import { Row, Container } from 'react-bootstrap';
 
 import Square from './square.js';
+import './board.css';
+
 import {
   lightSquareColor,
   darkSquareColor,
-  SQUARES_COUNT,
-  SQUARES_COUNT_PLUS_TRANSITIONS
+  ROW_COUNT,
+  COL_COUNT
 } from '../../constants/constants.js';
 
 class Board extends Component {
@@ -21,62 +22,57 @@ class Board extends Component {
     this.initBoardColors = this.initBoardColors.bind(this);
   }
 
+  // <<<<<<<<<<<<<<<<<<<< class methods >>>>>>>>>>>>>>>>>>>>
+
   initBoardColors() {
-
-  }
-
-  componentDidMount() {
     const squareColorIndicator = [];
     let c = false;
-    for (let i = 0; i < 64; i += 4) {
-      squareColorIndicator[i] = {
-        id: i,
-        darkColor: c
-      };
-      c = !c;
-      for (let j = 1 + i; j < 4 + i; j++) {
-        squareColorIndicator[j] = {
+    for (let i = 0; i < ROW_COUNT; i++) {
+      let x = [{
+        id: 0,
+        color: c
+      }];
+      for (let j = 1; j < COL_COUNT; j++) {
+        x.push({
           id: j,
-          darkColor: !squareColorIndicator[j - 1].darkColor
-        };
+          color: !x[j-1].color
+        });
       }
+      squareColorIndicator.push({
+        id: i,
+        row: x
+      });
+      c = !c;
     }
-    console.log(squareColorIndicator);
 
     this.setState({
       boardColors: squareColorIndicator
     });
   }
 
-  render() {
-    const leftBoardColors = this.state.boardColors.slice(
-      0, (this.state.boardColors.length / 2));
-    const rightBoardColors = this.state.boardColors.slice(
-      (this.state.boardColors.length / 2), this.state.boardColors.length + 1);
+  // <<<<<<<<<<<<<<<<<<<< lifecycle methods >>>>>>>>>>>>>>>>>>>>
 
-    console.log(this.state.boardColors);
+  componentDidMount() {
+    this.initBoardColors();
+  }
+
+  render() {
+    const boardColors = this.state.boardColors;
+
     return (
       <div className="Board" >
         <Container>
-          <Row>
-            <Col sm={6}>
-              <Row>
-                {leftBoardColors.map((item) => {
-                  const color = item.darkColor ? darkSquareColor : lightSquareColor;
-                  return <Square key={item.id} backgroundColor={color}></Square>;
+          {boardColors.map(rowObject => {
+            return (
+              <Row key={rowObject.id}>
+                {rowObject.row.map(squareWrapper => {
+                  const color = squareWrapper.color ? darkSquareColor : lightSquareColor;
+                  const id = `${squareWrapper.id}${rowObject.id}`
+                  return <Square key={id} backgroundColor={color}>{id}</Square> ;
                 })}
               </Row>
-            </Col>
-
-            <Col sm={6}>
-              <Row>
-                {rightBoardColors.map((item) => {
-                  const color = item.darkColor ? darkSquareColor : lightSquareColor;
-                  return <Square key={item.id} backgroundColor={color}></Square>;
-                })}
-              </Row>
-            </Col>
-          </Row>
+            );
+          })}
         </Container>
       </div>
     );
