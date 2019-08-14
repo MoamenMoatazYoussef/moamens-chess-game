@@ -49,11 +49,15 @@ class Board extends Component {
     super(props);
     this.state = {
       pieces: new Map(),
-      boardColors: []
+      boardColors: [],
+
+      oldPosition: null,
+      selectedPiece: null
     };
 
     this.initBoardColors = this.initBoardColors.bind(this);
     this.initBoardPieces = this.initBoardPieces.bind(this);
+    this.onSquareClick = this.onSquareClick.bind(this);
   }
 
   // <<<<<<<<<<<<<<<<<<<< class methods >>>>>>>>>>>>>>>>>>>>
@@ -104,7 +108,7 @@ class Board extends Component {
     ];
 
     for (let i = 0; i < COL_COUNT; i++) {
-      
+
       pieces.set(`0${i}`, {
         name: mainPieceNames[i],
         color: "black",
@@ -148,6 +152,28 @@ class Board extends Component {
     this.initBoardColors();
   }
 
+  onSquareClick(squarePosition) {
+    const position = squarePosition;
+    const { pieces, selectedPiece, oldPosition } = this.state;
+
+    if (selectedPiece) {
+      pieces.set(position, selectedPiece);
+      pieces.delete(oldPosition);
+      this.setState({
+        oldPosition: null,
+        selectedPiece: null
+      });
+      return;
+    }
+
+    if (pieces.has(position)) {
+      this.setState({
+        oldPosition: position,
+        selectedPiece: pieces.get(position)
+      })
+    }
+  }
+
   render() {
     const { boardColors, pieces } = this.state;
 
@@ -161,16 +187,12 @@ class Board extends Component {
                   const color = squareWrapper.color
                     ? darkSquareColor
                     : lightSquareColor;
-                  const id = `${rowObject.id}${squareWrapper.id}`;
+                  const position = `${rowObject.id}${squareWrapper.id}`;
                   return (
-                    <Square key={id} backgroundColor={color}>
-                      {pieces.has(id) ? (
+                    <Square key={position} position={position} backgroundColor={color} onSquareClick={this.onSquareClick}>
+                      {pieces.has(position) ? (
                         <Piece
-                          name={pieces.get(id).name}
-                          color={pieces.get(id).color}
-                          x={rowObject.id}
-                          y={squareWrapper.id}
-                          src={pieces.get(id).src}
+                          src={pieces.get(position).src}
                         />
                       ) : null}
                     </Square>

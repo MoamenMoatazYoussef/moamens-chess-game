@@ -8,17 +8,18 @@ class Square extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      position: {
-        x: this.props.x,
-        y: this.props.y
-      },
+      position: this.props.position,
       color: this.props.backgroundColor,
       currentPiece: null
     };
   }
 
+  get position() {
+    return this.state.position;
+  }
+
   render() {
-    const children = this.props.children;
+    const { children, onSquareClick } = this.props;
     return (
       <Col
         xs={1}
@@ -27,6 +28,7 @@ class Square extends Component {
           height: SQUARE_SIDE_LENGTH,
           backgroundColor: this.state.color
         }}
+        onClick={() => onSquareClick(this.state.position)}
       >
         {children}
       </Col>
