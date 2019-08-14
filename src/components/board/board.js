@@ -44,6 +44,8 @@ const blackPieceSources = {
   king: blackKing
 };
 
+
+
 class Board extends Component {
   constructor(props) {
     super(props);
@@ -112,7 +114,7 @@ class Board extends Component {
 
     for (let i = 0; i < COL_COUNT; i++) {
 
-      pieces.set(`0${i}`, {
+      pieces.set(`${i}0`, {
         name: pieceTypes[i],
         color: "black",
         x: 0,
@@ -120,7 +122,7 @@ class Board extends Component {
         src: blackPieceSources[pieceTypes[i]]
       });
 
-      pieces.set(`1${i}`, {
+      pieces.set(`${i}1`, {
         name: "pawn",
         color: "black",
         x: 1,
@@ -128,7 +130,7 @@ class Board extends Component {
         src: blackPawn
       });
 
-      pieces.set(`6${i}`, {
+      pieces.set(`${i}6`, {
         name: "pawn",
         color: "white",
         x: 6,
@@ -136,7 +138,7 @@ class Board extends Component {
         src: whitePawn
       });
 
-      pieces.set(`7${i}`, {
+      pieces.set(`${i}7`, {
         name: pieceTypes[i],
         color: "white",
         x: 7,
@@ -164,14 +166,15 @@ class Board extends Component {
 
     const pawnCondition = ((Math.abs(y1 - y2) === 1) && (x1 - x2 === 0));;
     const rookCondition = ((y1 - y2 === 0) || (x1 - x2 === 0));
-    const knightCondition = () => { //TODO: this condition is not working
+    const bishopCondition = (Math.abs(y1 - y2) === Math.abs(x1 - x2));
+    const queenCondition = rookCondition || bishopCondition;
+    const kingCondition = queenCondition && ((Math.abs(y1 - y2) === 1) || (Math.abs(x1 - x2) === 1));
+
+    const knightCondition = () => {
       const xSquared = (x2 - x1) ** 2;
       const ySquared = (y2 - y1) ** 2;
       return ((xSquared + ySquared === 5));
     };
-    const bishopCondition = (Math.abs(y1 - y2) === Math.abs(x1 - x2));
-    const queenCondition = rookCondition || bishopCondition;
-    const kingCondition = queenCondition && ((Math.abs(y1 - y2) === 1) || (Math.abs(x1 - x2) === 1));
 
     switch (pieceName) { //TODO: a better way than using names e.g. symbols or whatever
       case 'pawn':
@@ -179,7 +182,7 @@ class Board extends Component {
       case 'rook':
         return rookCondition;
       case 'knight':
-        return knightCondition;
+        return knightCondition();
       case 'bishop':
         return bishopCondition;
       case 'queen':
@@ -192,6 +195,14 @@ class Board extends Component {
   }
 
   checkPath(pieceName, oldPosition, newPosition) {
+
+    const y1 = Number(oldPosition.substr(0, 1));
+    const x1 = Number(oldPosition.substr(1));
+
+    const y2 = Number(newPosition.substr(0, 1));
+    const x2 = Number(newPosition.substr(1));
+
+    const { pieces } = this.state;
     if (oldPosition === newPosition) {
       //throw error: destination must be different from starting point
       return false;
@@ -199,20 +210,35 @@ class Board extends Component {
 
 
     switch (pieceName) { //TODO: implement checkPath
-      case 'P':
-        return true;
-      case 'R':
-        return true;
-      case 'N':
+      case 'pawn':
+      case 'rook':
+      case 'bishop':
+      case 'queen':
+      case 'king':
+          let noOfSquares = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+
+          let rad    = Math.sqrt(((x2 - x1)**2) + ((y2 - y1)**2));
+          let theta = Math.asin((x2 - x1)/rad);
+      
+          let xIncrease = Math.round(Math.sin(theta));
+          let yIncrease = Math.round(Math.cos(theta));
+
+          debugger;
+      
+          for (let i = 1; i < noOfSquares; i++)
+          {
+            let x = (x1 + i*xIncrease);
+            let y = (y1 - i*yIncrease);
+            let square = `${y}${x}`;
+            
+            if (pieces.has(square))
+              return false;
+          }
+          return true;
+      case 'knight':
         return true; //this will remain true
-      case 'B':
-        return true;
-      case 'Q':
-        return true;
-      case 'K':
-        return true;
       default:
-        return true;
+        return false;
     }
   }
 
@@ -220,32 +246,27 @@ class Board extends Component {
     const position = squarePosition;
     const { pieces, selectedPiece, oldPosition } = this.state;
 
-    console.log(selectedPiece);
-
     if (selectedPiece) { //selecting destination
       const legalMove = this.checkMove(selectedPiece.name, oldPosition, position);
       const clearPath = this.checkPath(selectedPiece.name, oldPosition, position);
       if (!legalMove) {
-        //throw error: illegal move for ${selectedPiece.name}.
-        console.log('legal move error');
+        alert(`Illegal move for ${selectedPiece.name}.`);
       } else if (!clearPath) {
-        console.log('clear path error');
-        //throw error: path is not clear for ${selectedPiece.name}
+        alert(`Path is not clear for ${selectedPiece.name}`);
       } else {
         pieces.set(position, selectedPiece);
         pieces.delete(oldPosition);
       }
     }
+
     else if (pieces.has(position)) //first click on square with piece (selecting source)
     {
-      console.log(':(');
       this.setState({
         oldPosition: position,
         selectedPiece: pieces.get(position)
       });
       return;
-    } else { //clicking on empty square and there is no selected piece
-      console.log(':( 2');
+    } else {
       return;
     }
 
@@ -268,9 +289,10 @@ class Board extends Component {
                   const color = squareWrapper.color
                     ? darkSquareColor
                     : lightSquareColor;
-                  const position = `${rowObject.id}${squareWrapper.id}`;
+                  const position = `${squareWrapper.id}${rowObject.id}`;
                   return (
                     <Square key={position} position={position} backgroundColor={color} onSquareClick={this.onSquareClick}>
+                      <span>{position}</span>
                       {pieces.has(position) ? (
                         <Piece
                           src={pieces.get(position).src}
