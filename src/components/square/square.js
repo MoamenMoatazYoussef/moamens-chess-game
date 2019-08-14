@@ -21,7 +21,7 @@ class Square extends Component {
     const children = this.props.children;
     return (
       <Col
-        sm={1}
+        xs={1}
         style={{
           width: SQUARE_SIDE_LENGTH,
           height: SQUARE_SIDE_LENGTH,

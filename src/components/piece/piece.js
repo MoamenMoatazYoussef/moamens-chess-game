@@ -12,9 +12,6 @@ class Piece extends Component {
         },
         src: this.props.src
         };
-
-        // this.getPiecePosition = this.getPiecePosition.bind(this);
-        // this.setPiecePosition = this.setPiecePosition.bind(this);
     }
 
     get position() {
