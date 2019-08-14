@@ -12,7 +12,7 @@ import {
   COL_COUNT
 } from "../../constants/constants.js";
 
-import whitePawn from "../../resources/pieces/white/pawn.png";
+import whitePawn from "../../resources/pieces/white/pawn.png"; //TODO: improve this..
 import whiteRook from "../../resources/pieces/white/rook.png";
 import whiteKnight from "../../resources/pieces/white/knight.png";
 import whiteBishop from "../../resources/pieces/white/bishop.png";
