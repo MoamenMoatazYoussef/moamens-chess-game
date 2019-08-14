@@ -63,6 +63,8 @@ class Board extends Component {
 
     this.checkMove = this.checkMove.bind(this);
     this.checkPath = this.checkPath.bind(this);
+
+    this.getAngleInDegrees = this.getAngleInDegrees.bind(this);
   }
 
   // <<<<<<<<<<<<<<<<<<<< class methods >>>>>>>>>>>>>>>>>>>>
@@ -70,17 +72,20 @@ class Board extends Component {
   initBoardColors() {
     const squareColorIndicator = [];
     let c = false;
-    for (let i = 0; i < ROW_COUNT; i++) {
+
+    // debugger;
+
+    for (let i = ROW_COUNT - 1; i >= 0; i--) {
       let x = [
         {
           id: 0,
           color: c
         }
       ];
-      for (let j = 1; j < COL_COUNT; j++) {
+      for (let j = COL_COUNT; j > 1; j--) {
         x.push({
-          id: j,
-          color: !x[j - 1].color
+          id: COL_COUNT - j + 1,
+          color: !x[COL_COUNT - j].color
         });
       }
       squareColorIndicator.push({
@@ -195,18 +200,17 @@ class Board extends Component {
   }
 
   checkPath(pieceName, oldPosition, newPosition) {
-    const x1 = Number(oldPosition.substr(1));
-    const y1 = Number(oldPosition.substr(0, 1));
+    const y1 = Number(oldPosition.substr(1));
+    const x1 = Number(oldPosition.substr(0, 1));
 
-    const x2 = Number(newPosition.substr(1));
-    const y2 = Number(newPosition.substr(0, 1));
+    const y2 = Number(newPosition.substr(1));
+    const x2 = Number(newPosition.substr(0, 1));
 
     const { pieces } = this.state;
     if (oldPosition === newPosition) {
       //throw error: destination must be different from starting point
       return false;
     }
-
 
     switch (pieceName) { //TODO: implement checkPath
       case 'pawn':
@@ -216,25 +220,18 @@ class Board extends Component {
       case 'king':
         let noOfSquares = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
 
-        // let rad   = Math.floor(Math.sqrt(((x2 - x1)**2) + ((y2 - y1)**2)));
-        let thetaRad = Math.atan((y2 - y1) / (x2 - x1));
-        let thetaDegrees = thetaRad * (180 / Math.PI);
-        console.log(thetaDegrees);
-        if (thetaDegrees <= 0) {
-          thetaDegrees += 180;
-        }
-
+        let thetaDegrees = this.getAngleInDegrees(x1, y1, x2, y2);
         let theta = (Math.PI / 180) * thetaDegrees;
 
-        let xIncrease = Math.round(Math.cos(theta));
-        let yIncrease = Math.round(Math.sin(theta));
-
-        debugger;
+        let yIncrease = Math.round(Math.cos(theta));
+        let xIncrease = Math.round(Math.sin(theta));
 
         for (let i = 1; i <= noOfSquares; i++) {
           let x = (x1 + i * xIncrease);
           let y = (y1 + i * yIncrease);
           let square = `${y}${x}`;
+
+          debugger;
 
           if (pieces.has(square))
             // alert(`Path is not clear for ${pieceName} at position ${square}`);
@@ -246,6 +243,18 @@ class Board extends Component {
       default:
         return false;
     }
+  }
+
+  getAngleInDegrees(x1, y1, x2, y2) {
+    let thetaRad = Math.atan((y2 - y1) / (x2 - x1));
+    let thetaDegrees = thetaRad * (180 / Math.PI);
+    if (y2 >= y1 && x2 < x1) {
+      thetaDegrees += 180;
+    }
+    if (x2 >= x1 && y2 < y1) {
+      thetaDegrees += 360;
+    }
+    return thetaDegrees;
   }
 
   onSquareClick(squarePosition) {
@@ -295,7 +304,9 @@ class Board extends Component {
                   const color = squareWrapper.color
                     ? darkSquareColor
                     : lightSquareColor;
-                  const position = `${squareWrapper.id}${rowObject.id}`;
+                  const y = squareWrapper.id;
+                  const x = rowObject.id
+                  const position = `${y}${x}`;
                   return (
                     <Square key={position} position={position} backgroundColor={color} onSquareClick={this.onSquareClick}>
                       <span>{position}</span>
