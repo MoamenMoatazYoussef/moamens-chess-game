@@ -58,6 +58,9 @@ class Board extends Component {
     this.initBoardColors = this.initBoardColors.bind(this);
     this.initBoardPieces = this.initBoardPieces.bind(this);
     this.onSquareClick = this.onSquareClick.bind(this);
+
+    this.checkMove = this.checkMove.bind(this);
+    this.checkPath = this.checkPath.bind(this);
   }
 
   // <<<<<<<<<<<<<<<<<<<< class methods >>>>>>>>>>>>>>>>>>>>
@@ -96,7 +99,7 @@ class Board extends Component {
   initBoardPieces() { //TODO: Needs improvement in loop
     let pieces = new Map();
 
-    const mainPieceNames = [
+    const pieceTypes = [
       "rook",
       "knight",
       "bishop",
@@ -110,11 +113,11 @@ class Board extends Component {
     for (let i = 0; i < COL_COUNT; i++) {
 
       pieces.set(`0${i}`, {
-        name: mainPieceNames[i],
+        name: pieceTypes[i],
         color: "black",
         x: 0,
         y: i,
-        src: blackPieceSources[mainPieceNames[i]]
+        src: blackPieceSources[pieceTypes[i]]
       });
 
       pieces.set(`1${i}`, {
@@ -134,11 +137,11 @@ class Board extends Component {
       });
 
       pieces.set(`7${i}`, {
-        name: mainPieceNames[i],
+        name: pieceTypes[i],
         color: "white",
         x: 7,
         y: i,
-        src: whitePieceSources[mainPieceNames[i]]
+        src: whitePieceSources[pieceTypes[i]]
       });
     }
 
@@ -152,26 +155,104 @@ class Board extends Component {
     this.initBoardColors();
   }
 
+  checkMove(pieceName, oldPosition, newPosition) {
+    const y1 = Number(oldPosition.substr(0, 1));
+    const x1 = Number(oldPosition.substr(1));
+
+    const y2 = Number(newPosition.substr(0, 1));
+    const x2 = Number(newPosition.substr(1));
+
+    const pawnCondition = ((Math.abs(y1 - y2) === 1) && (x1 - x2 === 0));;
+    const rookCondition = ((y1 - y2 === 0) || (x1 - x2 === 0));
+    const knightCondition = () => { //TODO: this condition is not working
+      const xSquared = (x2 - x1) ** 2;
+      const ySquared = (y2 - y1) ** 2;
+      return ((xSquared + ySquared === 5));
+    };
+    const bishopCondition = (Math.abs(y1 - y2) === Math.abs(x1 - x2));
+    const queenCondition = rookCondition || bishopCondition;
+    const kingCondition = queenCondition && ((Math.abs(y1 - y2) === 1) || (Math.abs(x1 - x2) === 1));
+
+    switch (pieceName) { //TODO: a better way than using names e.g. symbols or whatever
+      case 'pawn':
+        return pawnCondition;
+      case 'rook':
+        return rookCondition;
+      case 'knight':
+        return knightCondition;
+      case 'bishop':
+        return bishopCondition;
+      case 'queen':
+        return queenCondition;
+      case 'king':
+        return kingCondition;
+      default:
+        return false;
+    }
+  }
+
+  checkPath(pieceName, oldPosition, newPosition) {
+    if (oldPosition === newPosition) {
+      //throw error: destination must be different from starting point
+      return false;
+    }
+
+
+    switch (pieceName) { //TODO: implement checkPath
+      case 'P':
+        return true;
+      case 'R':
+        return true;
+      case 'N':
+        return true; //this will remain true
+      case 'B':
+        return true;
+      case 'Q':
+        return true;
+      case 'K':
+        return true;
+      default:
+        return true;
+    }
+  }
+
   onSquareClick(squarePosition) {
     const position = squarePosition;
     const { pieces, selectedPiece, oldPosition } = this.state;
 
-    if (selectedPiece) {
-      pieces.set(position, selectedPiece);
-      pieces.delete(oldPosition);
-      this.setState({
-        oldPosition: null,
-        selectedPiece: null
-      });
-      return;
-    }
+    console.log(selectedPiece);
 
-    if (pieces.has(position)) {
+    if (selectedPiece) { //selecting destination
+      const legalMove = this.checkMove(selectedPiece.name, oldPosition, position);
+      const clearPath = this.checkPath(selectedPiece.name, oldPosition, position);
+      if (!legalMove) {
+        //throw error: illegal move for ${selectedPiece.name}.
+        console.log('legal move error');
+      } else if (!clearPath) {
+        console.log('clear path error');
+        //throw error: path is not clear for ${selectedPiece.name}
+      } else {
+        pieces.set(position, selectedPiece);
+        pieces.delete(oldPosition);
+      }
+    }
+    else if (pieces.has(position)) //first click on square with piece (selecting source)
+    {
+      console.log(':(');
       this.setState({
         oldPosition: position,
         selectedPiece: pieces.get(position)
-      })
+      });
+      return;
+    } else { //clicking on empty square and there is no selected piece
+      console.log(':( 2');
+      return;
     }
+
+    this.setState({
+      oldPosition: null,
+      selectedPiece: null
+    });
   }
 
   render() {
