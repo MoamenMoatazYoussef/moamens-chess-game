@@ -158,13 +158,13 @@ class Board extends Component {
   }
 
   checkMove(pieceName, oldPosition, newPosition) {
-    const y1 = Number(oldPosition.substr(0, 1));
     const x1 = Number(oldPosition.substr(1));
+    const y1 = Number(oldPosition.substr(0, 1));
 
-    const y2 = Number(newPosition.substr(0, 1));
     const x2 = Number(newPosition.substr(1));
+    const y2 = Number(newPosition.substr(0, 1));
 
-    const pawnCondition = ((Math.abs(y1 - y2) === 1) && (x1 - x2 === 0));;
+    const pawnCondition = ((Math.abs(x1 - x2) === 1) && (y1 - y2 === 0));
     const rookCondition = ((y1 - y2 === 0) || (x1 - x2 === 0));
     const bishopCondition = (Math.abs(y1 - y2) === Math.abs(x1 - x2));
     const queenCondition = rookCondition || bishopCondition;
@@ -195,12 +195,11 @@ class Board extends Component {
   }
 
   checkPath(pieceName, oldPosition, newPosition) {
-
-    const y1 = Number(oldPosition.substr(0, 1));
     const x1 = Number(oldPosition.substr(1));
+    const y1 = Number(oldPosition.substr(0, 1));
 
-    const y2 = Number(newPosition.substr(0, 1));
     const x2 = Number(newPosition.substr(1));
+    const y2 = Number(newPosition.substr(0, 1));
 
     const { pieces } = this.state;
     if (oldPosition === newPosition) {
@@ -215,28 +214,35 @@ class Board extends Component {
       case 'bishop':
       case 'queen':
       case 'king':
-          let noOfSquares = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+        let noOfSquares = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
 
-          let rad    = Math.sqrt(((x2 - x1)**2) + ((y2 - y1)**2));
-          let theta = Math.asin((x2 - x1)/rad);
-      
-          let xIncrease = Math.round(Math.sin(theta));
-          let yIncrease = Math.round(Math.cos(theta));
+        // let rad   = Math.floor(Math.sqrt(((x2 - x1)**2) + ((y2 - y1)**2)));
+        let thetaRad = Math.atan((y2 - y1) / (x2 - x1));
+        let thetaDegrees = thetaRad * (180 / Math.PI);
+        console.log(thetaDegrees);
+        if (thetaDegrees <= 0) {
+          thetaDegrees += 180;
+        }
 
-          debugger;
-      
-          for (let i = 1; i < noOfSquares; i++)
-          {
-            let x = (x1 + i*xIncrease);
-            let y = (y1 - i*yIncrease);
-            let square = `${y}${x}`;
-            
-            if (pieces.has(square))
-              return false;
-          }
-          return true;
+        let theta = (Math.PI / 180) * thetaDegrees;
+
+        let xIncrease = Math.round(Math.cos(theta));
+        let yIncrease = Math.round(Math.sin(theta));
+
+        debugger;
+
+        for (let i = 1; i <= noOfSquares; i++) {
+          let x = (x1 + i * xIncrease);
+          let y = (y1 + i * yIncrease);
+          let square = `${y}${x}`;
+
+          if (pieces.has(square))
+            // alert(`Path is not clear for ${pieceName} at position ${square}`);
+            return false;
+        }
+        return true;
       case 'knight':
-        return true; //this will remain true
+        return true;
       default:
         return false;
     }
