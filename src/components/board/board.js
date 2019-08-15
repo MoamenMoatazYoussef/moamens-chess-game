@@ -108,8 +108,6 @@ class Board extends Component {
           let y = y1 + i * yIncrease;
           let square = `${y}${x}`;
 
-          debugger;
-
           if (pieces.has(square))
             // alert(`Path is not clear for ${pieceName} at position ${square}`);
             return false;
