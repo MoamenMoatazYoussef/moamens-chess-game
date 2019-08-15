@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Row, Container } from "react-bootstrap";
+import { Row, Col, Container } from "react-bootstrap";
 
 import BoardInitializer from "./boardInitializer.js";
 
@@ -97,51 +97,11 @@ class Board extends Component {
       case "queen":
       case "king":
         let noOfSquares = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
-
         let thetaDegrees = this.getAngleInDegrees(x1, y1, x2, y2);
-        // let theta = (Math.PI / 180) * thetaDegrees;
+        let theta = (Math.PI / 180) * thetaDegrees;
 
-        // let yIncrease = Math.round(Math.cos(theta));
-        // let xIncrease = Math.round(Math.sin(theta));
-
-        let xIncrease;
-        let yIncrease;
-        switch (thetaDegrees) {
-          case 45:
-            xIncrease = 1;
-            yIncrease = 1;
-            break;
-          case 90:
-            xIncrease = 0;
-            yIncrease = 1;
-            break;
-          case 135:
-            xIncrease = -1;
-            yIncrease = 1;
-            break;
-          case 180:
-            xIncrease = -1;
-            yIncrease = 0;
-            break;
-          case 225:
-            xIncrease = -1;
-            yIncrease = -1;
-            break;
-          case 270:
-            xIncrease = 0;
-            yIncrease = -1;
-            break;
-          case 315:
-            xIncrease = 1;
-            yIncrease = -1;
-            break;
-          case 360:
-          case 0:
-          default:
-            xIncrease = 1;
-            yIncrease = 0;
-            break;
-        }
+        let xIncrease = Math.round(Math.cos(theta));
+        let yIncrease = Math.round(Math.sin(theta));
 
         for (let i = 1; i <= noOfSquares; i++) {
           let x = x1 + i * xIncrease;
@@ -231,8 +191,7 @@ class Board extends Component {
     const { boardColors, pieces } = this.state;
 
     return (
-      <div className="Board">
-        <Container>
+      <Container className="Board">
           {boardColors.map(rowObject => {
             return (
               <Row key={rowObject.id}>
@@ -260,8 +219,7 @@ class Board extends Component {
               </Row>
             );
           })}
-        </Container>
-      </div>
+      </Container>
     );
   }
 }
