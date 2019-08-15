@@ -56,7 +56,7 @@ class Board extends Component {
     };
 
     switch (
-      pieceName //TODO: a better way than using names e.g. symbols or whatever
+    pieceName //TODO: a better way than using names e.g. symbols or whatever
     ) {
       case "pawn":
         return pawnCondition;
@@ -89,7 +89,7 @@ class Board extends Component {
     }
 
     switch (
-      pieceName //TODO: implement checkPath
+    pieceName //TODO: implement checkPath
     ) {
       case "pawn":
       case "rook":
@@ -103,7 +103,7 @@ class Board extends Component {
         let xIncrease = Math.round(Math.cos(theta));
         let yIncrease = Math.round(Math.sin(theta));
 
-        for (let i = 1; i <= noOfSquares; i++) {
+        for (let i = 1; i < noOfSquares; i++) {
           let x = x1 + i * xIncrease;
           let y = y1 + i * yIncrease;
           let square = `${y}${x}`;
@@ -112,8 +112,25 @@ class Board extends Component {
             // alert(`Path is not clear for ${pieceName} at position ${square}`);
             return false;
         }
+
+        debugger;
+
+        if(pieces.has(newPosition)) {
+          if(pieces.get(newPosition).color !== pieces.get(oldPosition).color) {
+            return true;
+          }
+          return false;
+        }
         return true;
       case "knight":
+        debugger;
+
+        if(pieces.has(newPosition)) {
+          if(pieces.get(newPosition).color !== pieces.get(oldPosition).color) {
+            return true;
+          }
+          return false;
+        }
         return true;
       default:
         return false;
@@ -190,33 +207,36 @@ class Board extends Component {
 
     return (
       <Container className="Board">
-          {boardColors.map(rowObject => {
-            return (
-              <Row key={rowObject.id}>
-                {rowObject.row.map(squareWrapper => {
-                  const color = squareWrapper.color
-                    ? darkSquareColor
-                    : lightSquareColor;
-                  const y = squareWrapper.id;
-                  const x = rowObject.id;
-                  const position = `${y}${x}`;
-                  return (
-                    <Square
-                      key={position}
-                      position={position}
-                      backgroundColor={color}
-                      onSquareClick={this.onSquareClick}
-                    >
-                      <span>{position}</span>
-                      {pieces.has(position) ? (
-                        <Piece src={pieces.get(position).src} />
-                      ) : null}
-                    </Square>
-                  );
-                })}
-              </Row>
-            );
-          })}
+        {boardColors.map(rowObject => {
+          return (
+            <Row key={rowObject.id}>
+              {rowObject.row.map(squareWrapper => {
+                const color = squareWrapper.color
+                  ? darkSquareColor
+                  : lightSquareColor;
+                const y = squareWrapper.id;
+                const x = rowObject.id;
+                const position = `${y}${x}`;
+                return (
+                  <Square
+                    key={position}
+                    position={position}
+                    backgroundColor={color}
+                    onSquareClick={this.onSquareClick}
+                  >
+                    <span>{position}</span>
+                    {pieces.has(position) ? (
+                      <Piece 
+                        src={pieces.get(position).src} 
+                        name={pieces.get(position).name} 
+                        color={pieces.get(position).color} />
+                    ) : null}
+                  </Square>
+                );
+              })}
+            </Row>
+          );
+        })}
       </Container>
     );
   }

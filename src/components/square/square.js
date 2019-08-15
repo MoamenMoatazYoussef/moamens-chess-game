@@ -9,8 +9,7 @@ class Square extends Component {
     super(props);
     this.state = {
       position: this.props.position,
-      color: this.props.backgroundColor,
-      currentPiece: null
+      color: this.props.backgroundColor
     };
   }
 
