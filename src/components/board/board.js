@@ -21,6 +21,7 @@ class Board extends Component {
 
       oldPosition: null,
       selectedPiece: null,
+      possibleSquares: new Map(),
 
       boardInitializer: new BoardInitializer()
     };
@@ -31,6 +32,8 @@ class Board extends Component {
     this.checkPath = this.checkPath.bind(this);
 
     this.getAngleInDegrees = this.getAngleInDegrees.bind(this);
+    this.highlightPaths = this.highlightPaths.bind(this);
+    this.highlightSinglePath = this.highlightSinglePath.bind(this);
   }
 
   // <<<<<<<<<<<<<<<<<<<< class methods >>>>>>>>>>>>>>>>>>>>
@@ -89,13 +92,13 @@ class Board extends Component {
     }
 
     switch (
-    pieceName //TODO: implement checkPath
+    pieceName
     ) {
       case "pawn":
       case "rook":
       case "bishop":
       case "queen":
-      case "king":
+      case "king": //TODO: Refactor this, this code is duplicated in highlightPaths
         let noOfSquares = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
         let thetaDegrees = this.getAngleInDegrees(x1, y1, x2, y2);
         let theta = (Math.PI / 180) * thetaDegrees;
@@ -113,20 +116,16 @@ class Board extends Component {
             return false;
         }
 
-        debugger;
-
-        if(pieces.has(newPosition)) {
-          if(pieces.get(newPosition).color !== pieces.get(oldPosition).color) {
+        if (pieces.has(newPosition)) {
+          if (pieces.get(newPosition).color !== pieces.get(oldPosition).color) {
             return true;
           }
           return false;
         }
         return true;
       case "knight":
-        debugger;
-
-        if(pieces.has(newPosition)) {
-          if(pieces.get(newPosition).color !== pieces.get(oldPosition).color) {
+        if (pieces.has(newPosition)) {
+          if (pieces.get(newPosition).color !== pieces.get(oldPosition).color) {
             return true;
           }
           return false;
@@ -134,6 +133,51 @@ class Board extends Component {
         return true;
       default:
         return false;
+    }
+  }
+
+  highlightPaths(position) {
+    const x1 = Number(position.substr(1));
+    const y1 = Number(position.substr(0, 1));
+
+    let possibleThetas = [0, 45, 90, 135, 180, 225, 270, 315];
+    let possibleSquares = [];
+
+    const { pieces } = this.state;
+
+    for (let i = 0; i < possibleThetas.length; i++) {
+      let theta = (Math.PI / 180) * possibleThetas[i];
+
+      possibleSquares = [...possibleSquares, this.highlightSinglePath(x1, y1, theta, pieces)];
+    }
+    
+    return possibleSquares;
+  }
+
+  highlightSinglePath(x1, y1, theta, pieces) {
+    let xIncrease = Math.round(Math.cos(theta));
+    let yIncrease = Math.round(Math.sin(theta));
+
+    let possibleSquares = [];
+
+    for (let i = 1;; i++) {
+      let x = x1 + i * xIncrease;
+      let y = y1 + i * yIncrease;
+      let square = `${y}${x}`;
+
+      if (x < 0 || x > 7 || y < 0 | y > 7) {
+        possibleSquares.push(square);
+        return possibleSquares; //end state: reached end of board last iteration 
+      }
+
+      if (pieces.has(square)) {
+        if (pieces.get(square).color !== pieces.get(square).color) {
+          possibleSquares.push(square);
+          return possibleSquares; //end state: last square has enemy piece, so included in possibleSquares
+        } else {
+          return possibleSquares; //end state: last square has ally piece, so not included in possibleSquares
+        }
+      }
     }
   }
 
@@ -175,9 +219,12 @@ class Board extends Component {
       }
     } else if (pieces.has(position)) {
       //first click on square with piece (selecting source)
+      let possibleSquares = this.highlightPaths(position);
+
       this.setState({
         oldPosition: position,
-        selectedPiece: pieces.get(position)
+        selectedPiece: pieces.get(position),
+        possibleSquares: possibleSquares
       });
       return;
     } else {
@@ -203,7 +250,9 @@ class Board extends Component {
   }
 
   render() {
-    const { boardColors, pieces } = this.state;
+    const { boardColors, pieces, possibleSquares } = this.state;
+
+    console.log(possibleSquares);
 
     return (
       <Container className="Board">
@@ -217,18 +266,22 @@ class Board extends Component {
                 const y = squareWrapper.id;
                 const x = rowObject.id;
                 const position = `${y}${x}`;
+                const highlighted = possibleSquares.has(position)
+                  ? 'red-border'
+                  : '';
                 return (
                   <Square
                     key={position}
                     position={position}
                     backgroundColor={color}
+                    className={highlighted}
                     onSquareClick={this.onSquareClick}
                   >
                     <span>{position}</span>
                     {pieces.has(position) ? (
-                      <Piece 
-                        src={pieces.get(position).src} 
-                        name={pieces.get(position).name} 
+                      <Piece
+                        src={pieces.get(position).src}
+                        name={pieces.get(position).name}
                         color={pieces.get(position).color} />
                     ) : null}
                   </Square>

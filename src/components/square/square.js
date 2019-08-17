@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Col } from "react-bootstrap";
 import { SQUARE_SIDE_LENGTH } from "../../constants/constants.js";
 
 import "./square.css";
@@ -18,9 +17,10 @@ class Square extends Component {
   }
 
   render() {
-    const { children, onSquareClick } = this.props;
+    const { children, onSquareClick, className } = this.props;
+    const classes = `d-flex ${className}`
     return (
-      <div className="d-flex"
+      <div className={classes}
         // xs={1}
         style={{
           width: SQUARE_SIDE_LENGTH,

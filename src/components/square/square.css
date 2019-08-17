@@ -1,3 +1,7 @@
 .center-center {
     background-position: center center;
 }
+
+.red-border {
+    border: 3px solid red;
+}
