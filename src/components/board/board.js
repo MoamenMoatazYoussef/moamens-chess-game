@@ -57,7 +57,7 @@ class Board extends Component {
     };
 
     switch (
-      pieceName //TODO: a better way than using names e.g. symbols or whatever
+    pieceName //TODO: a better way than using names e.g. symbols or whatever
     ) {
       case "pawn":
         return pawnCondition(x1, y1, x2, y2);
@@ -85,7 +85,7 @@ class Board extends Component {
     }
 
     switch (
-      pieceName //TODO: implement checkPath
+    pieceName
     ) {
       case "pawn":
       case "rook":
@@ -245,7 +245,10 @@ class Board extends Component {
                   >
                     <span>{position}</span>
                     {pieces.has(position) ? (
-                      <Piece src={pieces.get(position).src} />
+                      <Piece 
+                        src={pieces.get(position).src} 
+                        name={pieces.get(position).name} 
+                        color={pieces.get(position).color} />
                     ) : null}
                   </Square>
                 );
