@@ -53,7 +53,7 @@ Or if you know me just call me, I'll reply back.
 ## Contributions
 Moamen Moataz
 
-#######################################################################
+# React stuff that was created and I didn't erase since I might need to look at it later
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
