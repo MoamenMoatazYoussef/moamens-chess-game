@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Row, Col, Container } from "react-bootstrap";
+import { Row, Container } from "react-bootstrap";
 
 import BoardInitializer from "./boardInitializer.js";
 
@@ -21,7 +21,7 @@ class Board extends Component {
 
       oldPosition: null,
       selectedPiece: null,
-      possibleSquares: new Map(),
+      possibleSquares: [],
 
       boardInitializer: new BoardInitializer()
     };
@@ -30,10 +30,11 @@ class Board extends Component {
 
     this.checkMove = this.checkMove.bind(this);
     this.checkPath = this.checkPath.bind(this);
+    this.highlightPaths = this.highlightPaths.bind(this);
 
     this.getAngleInDegrees = this.getAngleInDegrees.bind(this);
-    this.highlightPaths = this.highlightPaths.bind(this);
-    this.highlightSinglePath = this.highlightSinglePath.bind(this);
+    this.getPath = this.getPath.bind(this);
+    this.getChangeInXandY = this.getChangeInXandY.bind(this);
   }
 
   // <<<<<<<<<<<<<<<<<<<< class methods >>>>>>>>>>>>>>>>>>>>
@@ -45,90 +46,77 @@ class Board extends Component {
     const x2 = Number(newPosition.substr(1));
     const y2 = Number(newPosition.substr(0, 1));
 
-    const pawnCondition = Math.abs(x1 - x2) === 1 && y1 - y2 === 0;
-    const rookCondition = y1 - y2 === 0 || x1 - x2 === 0;
-    const bishopCondition = Math.abs(y1 - y2) === Math.abs(x1 - x2);
-    const queenCondition = rookCondition || bishopCondition;
-    const kingCondition =
-      queenCondition && (Math.abs(y1 - y2) === 1 || Math.abs(x1 - x2) === 1);
+    const pawnCondition = (x1, y1, x2, y2) =>
+      Math.abs(x1 - x2) === 1 && y1 - y2 === 0;
+    const rookCondition = (x1, y1, x2, y2) => y1 - y2 === 0 || x1 - x2 === 0;
+    const bishopCondition = (x1, y1, x2, y2) =>
+      Math.abs(y1 - y2) === Math.abs(x1 - x2);
+    const queenCondition = (x1, y1, x2, y2) =>
+      rookCondition(x1, y1, x2, y2) || bishopCondition(x1, y1, x2, y2);
+    const kingCondition = (x1, y1, x2, y2) =>
+      queenCondition(x1, y1, x2, y2) &&
+      (Math.abs(y1 - y2) === 1 || Math.abs(x1 - x2) === 1);
 
-    const knightCondition = () => {
+    const knightCondition = (x1, y1, x2, y2) => {
       const xSquared = (x2 - x1) ** 2;
       const ySquared = (y2 - y1) ** 2;
       return xSquared + ySquared === 5;
     };
 
     switch (
-    pieceName //TODO: a better way than using names e.g. symbols or whatever
+      pieceName //TODO: a better way than using names e.g. symbols or whatever
     ) {
       case "pawn":
-        return pawnCondition;
+        return pawnCondition(x1, y1, x2, y2);
       case "rook":
-        return rookCondition;
+        return rookCondition(x1, y1, x2, y2);
       case "knight":
-        return knightCondition();
+        return knightCondition(x1, y1, x2, y2);
       case "bishop":
-        return bishopCondition;
+        return bishopCondition(x1, y1, x2, y2);
       case "queen":
-        return queenCondition;
+        return queenCondition(x1, y1, x2, y2);
       case "king":
-        return kingCondition;
+        return kingCondition(x1, y1, x2, y2);
       default:
         return false;
     }
   }
 
   checkPath(pieceName, oldPosition, newPosition) {
-    const x1 = Number(oldPosition.substr(1));
-    const y1 = Number(oldPosition.substr(0, 1));
-
-    const x2 = Number(newPosition.substr(1));
-    const y2 = Number(newPosition.substr(0, 1));
-
     const { pieces } = this.state;
+
     if (oldPosition === newPosition) {
       //throw error: destination must be different from starting point
       return false;
     }
 
-    switch (
-    pieceName
-    ) {
+    switch (pieceName) {
       case "pawn":
       case "rook":
       case "bishop":
       case "queen":
-      case "king": //TODO: Refactor this, this code is duplicated in highlightPaths
+      case "king":
+        const x1 = Number(oldPosition.substr(1));
+        const y1 = Number(oldPosition.substr(0, 1));
+
+        const x2 = Number(newPosition.substr(1));
+        const y2 = Number(newPosition.substr(0, 1));
+
         let noOfSquares = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
         let thetaDegrees = this.getAngleInDegrees(x1, y1, x2, y2);
-        let theta = (Math.PI / 180) * thetaDegrees;
 
-        let xIncrease = Math.round(Math.cos(theta));
-        let yIncrease = Math.round(Math.sin(theta));
-
-        for (let i = 1; i < noOfSquares; i++) {
-          let x = x1 + i * xIncrease;
-          let y = y1 + i * yIncrease;
-          let square = `${y}${x}`;
-
-          if (pieces.has(square))
-            // alert(`Path is not clear for ${pieceName} at position ${square}`);
-            return false;
+        const path = this.getPath(x1, y1, noOfSquares, thetaDegrees);
+        if (path[path.length - 1] === newPosition) {
+          return true;
         }
-
-        if (pieces.has(newPosition)) {
-          if (pieces.get(newPosition).color !== pieces.get(oldPosition).color) {
-            return true;
-          }
-          return false;
-        }
-        return true;
+        return false;
       case "knight":
         if (pieces.has(newPosition)) {
-          if (pieces.get(newPosition).color !== pieces.get(oldPosition).color) {
-            return true;
+          if (pieces.get(newPosition).color === pieces.get(oldPosition).color) {
+            return false;
           }
-          return false;
+          return true;
         }
         return true;
       default:
@@ -136,49 +124,80 @@ class Board extends Component {
     }
   }
 
-  highlightPaths(position) {
-    const x1 = Number(position.substr(1));
-    const y1 = Number(position.substr(0, 1));
+  highlightPaths(oldPosition, pieceName, pieceColor) {
+    const x1 = Number(oldPosition.substr(1));
+    const y1 = Number(oldPosition.substr(0, 1));
+    let pieceLimit = 99; //TODO: bad code, this should be changed
+    let possibleThetas;
 
-    let possibleThetas = [0, 45, 90, 135, 180, 225, 270, 315];
+    let blackAngleOffset = pieceColor === "black" ? 180 : 0;
+
+    switch (pieceName) {
+      case "pawn":
+        pieceLimit = 1;
+        possibleThetas = [0 + blackAngleOffset];
+        break;
+      case "rook":
+        possibleThetas = [0, 90, 180, 270];
+        break;
+      case "bishop":
+        possibleThetas = [45, 135, 225, 315];
+        break;
+      case "queen":
+        possibleThetas = [0, 45, 90, 135, 180, 225, 270, 315];
+        break;
+      case "king":
+        possibleThetas = [0, 45, 90, 135, 180, 225, 270, 315];
+        pieceLimit = 1;
+        break;
+      case "knight":
+        break;
+      default:
+        break;
+    }
+
     let possibleSquares = [];
 
-    const { pieces } = this.state;
-
     for (let i = 0; i < possibleThetas.length; i++) {
-      let theta = (Math.PI / 180) * possibleThetas[i];
-
-      possibleSquares = [...possibleSquares, this.highlightSinglePath(x1, y1, theta, pieces)];
+      possibleSquares = [
+        ...possibleSquares,
+        ...this.getPath(x1, y1, pieceLimit, possibleThetas[i])
+      ];
     }
-    
+
     return possibleSquares;
   }
 
-  highlightSinglePath(x1, y1, theta, pieces) {
-    let xIncrease = Math.round(Math.cos(theta));
-    let yIncrease = Math.round(Math.sin(theta));
+  getPath(x1, y1, limit, thetaDegrees) {
+    const { pieces } = this.state;
+    const { xIncrease, yIncrease } = this.getChangeInXandY(thetaDegrees);
 
-    let possibleSquares = [];
+    let path = [];
+    let x,
+      y,
+      i = 1;
 
-    for (let i = 1;; i++) {
-      let x = x1 + i * xIncrease;
-      let y = y1 + i * yIncrease;
-      let square = `${y}${x}`;
+    let boundaryCondition = x >= 0 && x <= 7 && y >= 0 && y <= 7;
+    let limitCondition = i <= limit;
 
-      if (x < 0 || x > 7 || y < 0 | y > 7) {
-        possibleSquares.push(square);
-        return possibleSquares; //end state: reached end of board last iteration 
-      }
+    do {
+      x = x1 + i * xIncrease;
+      y = y1 + i * yIncrease;
 
-      if (pieces.has(square)) {
-        if (pieces.get(square).color !== pieces.get(square).color) {
-          possibleSquares.push(square);
-          return possibleSquares; //end state: last square has enemy piece, so included in possibleSquares
-        } else {
-          return possibleSquares; //end state: last square has ally piece, so not included in possibleSquares
+      if (pieces.has(`${y}${x}`)) {
+        //TODO: Implement checkSquare and replace checks in checkPath because it's used at Knight
+        if (pieces.get(`${y}${x}`).color !== pieces.get(`${y1}${x1}`).color) {
+          path.push(`${y}${x}`);
         }
+        break;
       }
-    }
+      path.push(`${y}${x}`);
+      i++;
+
+      boundaryCondition = x >= 0 && x <= 7 && y >= 0 && y <= 7;
+      limitCondition = i <= limit;
+    } while (boundaryCondition && limitCondition);
+    return path;
   }
 
   getAngleInDegrees(x1, y1, x2, y2) {
@@ -191,6 +210,15 @@ class Board extends Component {
       thetaDegrees += 360;
     }
     return thetaDegrees;
+  }
+
+  getChangeInXandY(thetaDegrees) {
+    let thetaRad = (Math.PI / 180) * thetaDegrees;
+
+    return {
+      xIncrease: Math.round(Math.cos(thetaRad)),
+      yIncrease: Math.round(Math.sin(thetaRad))
+    };
   }
 
   onSquareClick(squarePosition) {
@@ -217,14 +245,20 @@ class Board extends Component {
         pieces.set(position, selectedPiece);
         pieces.delete(oldPosition);
       }
+      this.setState({
+        possibleSquares: []
+      });
     } else if (pieces.has(position)) {
       //first click on square with piece (selecting source)
-      let possibleSquares = this.highlightPaths(position);
-
+      let possibleSquares = this.highlightPaths(
+        position,
+        pieces.get(position).name,
+        pieces.get(position).color
+      );
       this.setState({
         oldPosition: position,
         selectedPiece: pieces.get(position),
-        possibleSquares: possibleSquares
+        possibleSquares
       });
       return;
     } else {
@@ -252,8 +286,6 @@ class Board extends Component {
   render() {
     const { boardColors, pieces, possibleSquares } = this.state;
 
-    console.log(possibleSquares);
-
     return (
       <Container className="Board">
         {boardColors.map(rowObject => {
@@ -266,9 +298,9 @@ class Board extends Component {
                 const y = squareWrapper.id;
                 const x = rowObject.id;
                 const position = `${y}${x}`;
-                const highlighted = possibleSquares.has(position)
-                  ? 'red-border'
-                  : '';
+                const highlighted = possibleSquares.includes(position)
+                  ? "1px solid red"
+                  : "";
                 return (
                   <Square
                     key={position}
@@ -276,13 +308,15 @@ class Board extends Component {
                     backgroundColor={color}
                     className={highlighted}
                     onSquareClick={this.onSquareClick}
+                    highlighted={highlighted}
                   >
                     <span>{position}</span>
                     {pieces.has(position) ? (
                       <Piece
                         src={pieces.get(position).src}
                         name={pieces.get(position).name}
-                        color={pieces.get(position).color} />
+                        color={pieces.get(position).color}
+                      />
                     ) : null}
                   </Square>
                 );
