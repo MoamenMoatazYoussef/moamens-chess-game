@@ -36,16 +36,9 @@ const blackPieceSources = {
 };
 
 class BoardInitializer {
-    // constructor() {
-    //     this.initBoardColors = this.initBoardColors.bind(this);
-    //     this.initBoardPieces = this.initBoardPieces.bind(this);
-    // }
-
     initBoardColors() {
         const squareColorIndicator = [];
         let c = false;
-
-        // debugger;
 
         for (let i = ROW_COUNT - 1; i >= 0; i--) {
             let x = [{
