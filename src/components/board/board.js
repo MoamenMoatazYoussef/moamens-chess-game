@@ -43,14 +43,14 @@ class Board extends Component {
     const x2 = Number(newPosition.substr(1));
     const y2 = Number(newPosition.substr(0, 1));
 
-    const pawnCondition = Math.abs(x1 - x2) === 1 && y1 - y2 === 0;
-    const rookCondition = y1 - y2 === 0 || x1 - x2 === 0;
-    const bishopCondition = Math.abs(y1 - y2) === Math.abs(x1 - x2);
-    const queenCondition = rookCondition || bishopCondition;
-    const kingCondition =
-      queenCondition && (Math.abs(y1 - y2) === 1 || Math.abs(x1 - x2) === 1);
+    const pawnCondition = (x1, y1, x2, y2) => Math.abs(x1 - x2) === 1 && y1 - y2 === 0;
+    const rookCondition = (x1, y1, x2, y2) => y1 - y2 === 0 || x1 - x2 === 0;
+    const bishopCondition = (x1, y1, x2, y2) => Math.abs(y1 - y2) === Math.abs(x1 - x2);
+    const queenCondition = (x1, y1, x2, y2) => rookCondition(x1, y1, x2, y2) || bishopCondition(x1, y1, x2, y2);
+    const kingCondition = (x1, y1, x2, y2) =>
+      queenCondition(x1, y1, x2, y2) && (Math.abs(y1 - y2) === 1 || Math.abs(x1 - x2) === 1);
 
-    const knightCondition = () => {
+    const knightCondition = (x1, y1, x2, y2) => {
       const xSquared = (x2 - x1) ** 2;
       const ySquared = (y2 - y1) ** 2;
       return xSquared + ySquared === 5;
@@ -60,17 +60,17 @@ class Board extends Component {
       pieceName //TODO: a better way than using names e.g. symbols or whatever
     ) {
       case "pawn":
-        return pawnCondition;
+        return pawnCondition(x1, y1, x2, y2);
       case "rook":
-        return rookCondition;
+        return rookCondition(x1, y1, x2, y2);
       case "knight":
-        return knightCondition();
+        return knightCondition(x1, y1, x2, y2);
       case "bishop":
-        return bishopCondition;
+        return bishopCondition(x1, y1, x2, y2);
       case "queen":
-        return queenCondition;
+        return queenCondition(x1, y1, x2, y2);
       case "king":
-        return kingCondition;
+        return kingCondition(x1, y1, x2, y2);
       default:
         return false;
     }
