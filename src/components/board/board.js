@@ -124,18 +124,48 @@ class Board extends Component {
     }
   }
 
-  highlightPaths(x1, y1, pieceLimit) {
+  highlightPaths(oldPosition, pieceName, pieceColor) {
+    const x1 = Number(oldPosition.substr(1));
+    const y1 = Number(oldPosition.substr(0, 1));
+    let pieceLimit = 99; //TODO: bad code, this should be changed
+    let possibleThetas;
+
+    let blackAngleOffset = pieceColor === "black" ? 180 : 0;
+
+    switch (pieceName) {
+      case "pawn":
+        pieceLimit = 1;
+        possibleThetas = [0 + blackAngleOffset];
+        break;
+      case "rook":
+        possibleThetas = [0, 90, 180, 270];
+        break;
+      case "bishop":
+        possibleThetas = [45, 135, 225, 315];
+        break;
+      case "queen":
+        possibleThetas = [0, 45, 90, 135, 180, 225, 270, 315];
+        break;
+      case "king":
+        possibleThetas = [0, 45, 90, 135, 180, 225, 270, 315];
+        pieceLimit = 1;
+        break;
+      case "knight":
+        break;
+      default:
+        break;
+    }
+
     let possibleSquares = [];
-    let possibleThetas = [0, 45, 90, 135, 180];
-    for(let i = 0 ; i < possibleThetas.length ; i++) {
+
+    for (let i = 0; i < possibleThetas.length; i++) {
       possibleSquares = [
         ...possibleSquares,
         ...this.getPath(x1, y1, pieceLimit, possibleThetas[i])
       ];
     }
-    this.setState({
-      possibleSquares,
-    });
+
+    return possibleSquares;
   }
 
   getPath(x1, y1, limit, thetaDegrees) {
@@ -150,13 +180,12 @@ class Board extends Component {
     let boundaryCondition = x >= 0 && x <= 7 && y >= 0 && y <= 7;
     let limitCondition = i <= limit;
 
-    debugger;
-
     do {
       x = x1 + i * xIncrease;
       y = y1 + i * yIncrease;
 
-      if (pieces.has(`${y}${x}`)) { //TODO: Implement checkSquare and replace checks in checkPath because it's used at Knight
+      if (pieces.has(`${y}${x}`)) {
+        //TODO: Implement checkSquare and replace checks in checkPath because it's used at Knight
         if (pieces.get(`${y}${x}`).color !== pieces.get(`${y1}${x1}`).color) {
           path.push(`${y}${x}`);
         }
@@ -164,11 +193,10 @@ class Board extends Component {
       }
       path.push(`${y}${x}`);
       i++;
-      
+
       boundaryCondition = x >= 0 && x <= 7 && y >= 0 && y <= 7;
       limitCondition = i <= limit;
-      
-    } while  (boundaryCondition && limitCondition);
+    } while (boundaryCondition && limitCondition);
     return path;
   }
 
@@ -217,11 +245,20 @@ class Board extends Component {
         pieces.set(position, selectedPiece);
         pieces.delete(oldPosition);
       }
+      this.setState({
+        possibleSquares: []
+      });
     } else if (pieces.has(position)) {
       //first click on square with piece (selecting source)
+      let possibleSquares = this.highlightPaths(
+        position,
+        pieces.get(position).name,
+        pieces.get(position).color
+      );
       this.setState({
         oldPosition: position,
-        selectedPiece: pieces.get(position)
+        selectedPiece: pieces.get(position),
+        possibleSquares
       });
       return;
     } else {
@@ -262,8 +299,8 @@ class Board extends Component {
                 const x = rowObject.id;
                 const position = `${y}${x}`;
                 const highlighted = possibleSquares.includes(position)
-                  ? '1px solid red'
-                  : '';
+                  ? "1px solid red"
+                  : "";
                 return (
                   <Square
                     key={position}
