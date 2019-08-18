@@ -18,14 +18,16 @@ class Square extends Component {
   }
 
   render() {
-    const { children, onSquareClick } = this.props;
+    const { children, onSquareClick, highlighted } = this.props;
     return (
       <Col //className="d-flex"
         xs={1}
+        // className={highlighted}
         style={{
           width: SQUARE_SIDE_LENGTH,
           height: SQUARE_SIDE_LENGTH,
-          backgroundColor: this.state.color
+          backgroundColor: this.state.color,
+          border: highlighted
         }}
         onClick={() => onSquareClick(this.state.position)}
       >
