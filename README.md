@@ -1,3 +1,59 @@
+# Moamen's Chess Game
+## What is Chess Game?
+This is a project I'm working on for fun and to practice React, also I like chess :'D
+You can work on it too if you're interested, just fork it and go crazy!
+
+## Goals
+  - Implement a fully functioning two-player chess game.
+  - Once we do that, we can try our luck at creating a simple AI to play against human players.
+
+## Currently Supported Features: 
+  - All basic moves of each piece.
+  - All basic boundary conditions (e.g. maximum limit for pieces such as Pawns).
+  - Highlighting of possible paths of a selected piece when it's selected.
+
+## Features To Be Added:
+  - Enforcing turns.
+  - Different states of play i.e. normal state, check state, checkmate.
+  - Special Moves i.e. en passent, castling, and promotion.
+  - A user interface that contains:
+    - Indicator for whose player's turn. 
+    - A side panel that collects captured pieces.
+  - Add a main menu that has:
+    - New Game, obviously.
+    - Load and Save games, the games will be saved locally using Local Storage API, and loaded using authentication.
+  - Advanced features:
+    - Create a host server and allow online games between two players on two different PCs.
+    - Allow users to create accounts, and create a scoreboard of each user.
+    - Allow creating tournaments with their own scoreboards.
+    - Make a simple AI with adjustable difficulty.
+  
+## Installation
+
+The only dependency for chess game is bootstrap.
+```sh
+$ git clone https://github.com/MoamenMoatazYoussef/moamens-chess-game
+$ cd moamens-chess-game
+$ npm install react-bootstrap bootstrap
+```
+
+Then run it using npm:
+```sh
+$ npm start
+```
+
+## Want to contribute?
+You can fork the project and work on it if you want, however I'm in the phase of redesigning it to make it less complex, so it's kind of a mess right now.
+
+Since there is no full documentation of how this works yet, and this Readme isn't very descriptive of the steps I'm currently taken, if you are interested you can contact me at:
+moamen.moataz.youssef@gmail.com
+
+Or if you know me just call me, I'll reply back.
+
+## Contributions
+Moamen Moataz
+
+#######################################################################
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
