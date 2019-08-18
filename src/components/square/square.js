@@ -21,8 +21,8 @@ class Square extends Component {
   render() {
     const { children, onSquareClick } = this.props;
     return (
-      <div className="d-flex"
-        // xs={1}
+      <Col //className="d-flex"
+        xs={1}
         style={{
           width: SQUARE_SIDE_LENGTH,
           height: SQUARE_SIDE_LENGTH,
@@ -31,7 +31,7 @@ class Square extends Component {
         onClick={() => onSquareClick(this.state.position)}
       >
         {children}
-      </div>
+      </Col>
     );
   }
 }

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Row, Col, Container } from "react-bootstrap";
+import { Row, Container } from "react-bootstrap";
 
 import BoardInitializer from "./boardInitializer.js";
 
@@ -31,6 +31,7 @@ class Board extends Component {
     this.checkPath = this.checkPath.bind(this);
 
     this.getAngleInDegrees = this.getAngleInDegrees.bind(this);
+    this.getPath = this.getPath.bind(this);
   }
 
   // <<<<<<<<<<<<<<<<<<<< class methods >>>>>>>>>>>>>>>>>>>>
@@ -76,13 +77,8 @@ class Board extends Component {
   }
 
   checkPath(pieceName, oldPosition, newPosition) {
-    const x1 = Number(oldPosition.substr(1));
-    const y1 = Number(oldPosition.substr(0, 1));
-
-    const x2 = Number(newPosition.substr(1));
-    const y2 = Number(newPosition.substr(0, 1));
-
     const { pieces } = this.state;
+
     if (oldPosition === newPosition) {
       //throw error: destination must be different from starting point
       return false;
@@ -96,28 +92,68 @@ class Board extends Component {
       case "bishop":
       case "queen":
       case "king":
-        let noOfSquares = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
-        let thetaDegrees = this.getAngleInDegrees(x1, y1, x2, y2);
-        let theta = (Math.PI / 180) * thetaDegrees;
-
-        let xIncrease = Math.round(Math.cos(theta));
-        let yIncrease = Math.round(Math.sin(theta));
-
-        for (let i = 1; i <= noOfSquares; i++) {
-          let x = x1 + i * xIncrease;
-          let y = y1 + i * yIncrease;
-          let square = `${y}${x}`;
-
-          if (pieces.has(square))
-            // alert(`Path is not clear for ${pieceName} at position ${square}`);
-            return false;
+        const path = this.getPath(oldPosition, newPosition, pieces);
+        if (path[path.length - 1] === newPosition) {
+          return true;
         }
-        return true;
+        return false;
       case "knight":
+        if (pieces.has(newPosition)) {
+          if (pieces.get(newPosition).color === pieces.get(oldPosition).color) {
+            return false;
+          }
+          return true;
+        }
         return true;
       default:
         return false;
     }
+  }
+
+  highlightPaths(oldPosition) {
+    
+  }
+
+  getPath(oldPosition, newPosition, pieces) {
+    const x1 = Number(oldPosition.substr(1));
+    const y1 = Number(oldPosition.substr(0, 1));
+
+    const x2 = Number(newPosition.substr(1));
+    const y2 = Number(newPosition.substr(0, 1));
+    
+    let noOfSquares = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+    let thetaDegrees = this.getAngleInDegrees(x1, y1, x2, y2);
+    let thetaRad = (Math.PI / 180) * thetaDegrees;
+
+    let path = [];
+
+    let xIncrease = Math.round(Math.cos(thetaRad));
+    let yIncrease = Math.round(Math.sin(thetaRad));
+
+    debugger;
+
+    for (let i = 1; i <= noOfSquares; i++) {
+      let x = x1 + i * xIncrease;
+      let y = y1 + i * yIncrease;
+      let square = `${y}${x}`;
+
+      if (pieces.has(square)) {
+        if (pieces.get(square).color !== pieces.get(oldPosition).color) {
+          path.push(square);
+        }
+        return path;
+      }
+      path.push(square);
+    }
+    return path;
+  }
+
+  checkSquare(pieces, square, oldPosition) { //TODO: Implement this and replace checks in checkPath
+    if (pieces.has(square)) {
+      //then stop but look at this
+      return pieces.get(square).color === pieces.get(oldPosition).color; //if true, bad, if false, good
+    }
+    return false; //if false, good
   }
 
   getAngleInDegrees(x1, y1, x2, y2) {
@@ -190,33 +226,33 @@ class Board extends Component {
 
     return (
       <Container className="Board">
-          {boardColors.map(rowObject => {
-            return (
-              <Row key={rowObject.id}>
-                {rowObject.row.map(squareWrapper => {
-                  const color = squareWrapper.color
-                    ? darkSquareColor
-                    : lightSquareColor;
-                  const y = squareWrapper.id;
-                  const x = rowObject.id;
-                  const position = `${y}${x}`;
-                  return (
-                    <Square
-                      key={position}
-                      position={position}
-                      backgroundColor={color}
-                      onSquareClick={this.onSquareClick}
-                    >
-                      <span>{position}</span>
-                      {pieces.has(position) ? (
-                        <Piece src={pieces.get(position).src} />
-                      ) : null}
-                    </Square>
-                  );
-                })}
-              </Row>
-            );
-          })}
+        {boardColors.map(rowObject => {
+          return (
+            <Row key={rowObject.id}>
+              {rowObject.row.map(squareWrapper => {
+                const color = squareWrapper.color
+                  ? darkSquareColor
+                  : lightSquareColor;
+                const y = squareWrapper.id;
+                const x = rowObject.id;
+                const position = `${y}${x}`;
+                return (
+                  <Square
+                    key={position}
+                    position={position}
+                    backgroundColor={color}
+                    onSquareClick={this.onSquareClick}
+                  >
+                    <span>{position}</span>
+                    {pieces.has(position) ? (
+                      <Piece src={pieces.get(position).src} />
+                    ) : null}
+                  </Square>
+                );
+              })}
+            </Row>
+          );
+        })}
       </Container>
     );
   }
