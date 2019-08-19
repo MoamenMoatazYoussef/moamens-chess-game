@@ -40,11 +40,11 @@ class Board extends Component {
   // <<<<<<<<<<<<<<<<<<<< class methods >>>>>>>>>>>>>>>>>>>>
 
   checkMove(pieceName, oldPosition, newPosition) {
-    const x1 = Number(oldPosition.substr(1));
-    const y1 = Number(oldPosition.substr(0, 1));
+    const x1 = oldPosition.x;
+    const y1 = oldPosition.y;
 
-    const x2 = Number(newPosition.substr(1));
-    const y2 = Number(newPosition.substr(0, 1));
+    const x2 = newPosition.x;
+    const y2 = newPosition.y;
 
     const pawnCondition = (x1, y1, x2, y2) =>
       Math.abs(x1 - x2) === 1 && y1 - y2 === 0;
@@ -64,7 +64,7 @@ class Board extends Component {
     };
 
     switch (
-      pieceName //TODO: a better way than using names e.g. symbols or whatever
+    pieceName //TODO: a better way than using names e.g. symbols or whatever
     ) {
       case "pawn":
         return pawnCondition(x1, y1, x2, y2);
@@ -97,17 +97,17 @@ class Board extends Component {
       case "bishop":
       case "queen":
       case "king":
-        const x1 = Number(oldPosition.substr(1));
-        const y1 = Number(oldPosition.substr(0, 1));
+        const x1 = oldPosition.x;
+        const y1 = oldPosition.y;
 
-        const x2 = Number(newPosition.substr(1));
-        const y2 = Number(newPosition.substr(0, 1));
+        const x2 = newPosition.x;
+        const y2 = newPosition.y;
 
         let noOfSquares = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
         let thetaDegrees = this.getAngleInDegrees(x1, y1, x2, y2);
 
         const path = this.getPath(x1, y1, noOfSquares, thetaDegrees);
-        if (path[path.length - 1] === newPosition) {
+        if (path[path.length - 1] === newPosition.stringFormat) {
           return true;
         }
         return false;
@@ -125,8 +125,8 @@ class Board extends Component {
   }
 
   highlightPaths(oldPosition, pieceName, pieceColor) {
-    const x1 = Number(oldPosition.substr(1));
-    const y1 = Number(oldPosition.substr(0, 1));
+    const x1 = oldPosition.x;
+    const y1 = oldPosition.y;
     let pieceLimit = 99; //TODO: bad code, this should be changed
     let possibleThetas;
 
@@ -150,7 +150,7 @@ class Board extends Component {
         possibleThetas = [0, 45, 90, 135, 180, 225, 270, 315];
         pieceLimit = 1;
         break;
-      case "knight": //TODO: refactor getPath to include Knight then get possibleSquares
+      case "knight":
         break;
       default:
         break;
@@ -242,22 +242,22 @@ class Board extends Component {
       } else if (!clearPath) {
         alert(`Path is not clear for ${selectedPiece.name}`);
       } else {
-        pieces.set(position, selectedPiece);
-        pieces.delete(oldPosition);
+        pieces.set(position.stringFormat, selectedPiece);
+        pieces.delete(oldPosition.stringFormat);
       }
       this.setState({
         possibleSquares: []
       });
-    } else if (pieces.has(position)) {
+    } else if (pieces.has(position.stringFormat)) {
       //first click on square with piece (selecting source)
       let possibleSquares = this.highlightPaths(
         position,
-        pieces.get(position).name,
-        pieces.get(position).color
+        pieces.get(position.stringFormat).name,
+        pieces.get(position.stringFormat).color
       );
       this.setState({
         oldPosition: position,
-        selectedPiece: pieces.get(position),
+        selectedPiece: pieces.get(position.stringFormat),
         possibleSquares
       });
       return;
@@ -297,24 +297,31 @@ class Board extends Component {
                   : lightSquareColor;
                 const y = squareWrapper.id;
                 const x = rowObject.id;
-                const position = `${y}${x}`;
-                const highlighted = possibleSquares.includes(position)
+                const position = {
+                  x: x,
+                  y: y,
+                  stringFormat: `${y}${x}`
+                };
+                const highlighted = possibleSquares.includes(position.stringFormat)
                   ? "1px solid red"
                   : "";
                 return (
                   <Square
-                    key={position}
+                    key={position.stringFormat}
+
                     position={position}
-                    backgroundColor={color}
                     onSquareClick={this.onSquareClick}
+
+                    backgroundColor={color}
+                    className={highlighted}
                     highlighted={highlighted}
                   >
-                    <span>{position}</span>
-                    {pieces.has(position) ? (
+                    <span>{position.stringFormat}</span>
+                    {pieces.has(position.stringFormat) ? (
                       <Piece
-                        src={pieces.get(position).src}
-                        name={pieces.get(position).name}
-                        color={pieces.get(position).color}
+                        src={pieces.get(position.stringFormat).src}
+                        name={pieces.get(position.stringFormat).name}
+                        color={pieces.get(position.stringFormat).color}
                       />
                     ) : null}
                   </Square>

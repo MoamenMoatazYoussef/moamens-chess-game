@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { Col } from "react-bootstrap";
 import { SQUARE_SIDE_LENGTH } from "../../constants/constants.js";
+import { Col } from 'react-bootstrap';
 
 import "./square.css";
 
