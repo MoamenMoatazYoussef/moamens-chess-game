@@ -248,7 +248,14 @@ class Board extends Component {
       this.setState({
         possibleSquares: []
       });
-    } else if (pieces.has(position.stringFormat)) {
+    } 
+    else 
+    {
+      // let pieceInSquare = ;
+      if (!pieces.has(position.stringFormat)) { // change to if(!pieces.has(pieceInSquare))
+        return; 
+      }
+
       //first click on square with piece (selecting source)
       let possibleSquares = this.highlightPaths(
         position,
@@ -260,8 +267,6 @@ class Board extends Component {
         selectedPiece: pieces.get(position.stringFormat),
         possibleSquares
       });
-      return;
-    } else {
       return;
     }
 
@@ -318,11 +323,7 @@ class Board extends Component {
                   >
                     <span>{position.stringFormat}</span>
                     {pieces.has(position.stringFormat) ? (
-                      <Piece
-                        src={pieces.get(position.stringFormat).src}
-                        name={pieces.get(position.stringFormat).name}
-                        color={pieces.get(position.stringFormat).color}
-                      />
+                      <Piece src={pieces.get(position.stringFormat).src} />
                     ) : null}
                   </Square>
                 );
