@@ -1,7 +1,6 @@
 # Moamen's Chess Game
 ## What is Chess Game?
 This is a project I'm working on for fun and to practice React, also I like chess :'D
-You can work on it too if you're interested, just fork it and go crazy!
 
 ## Goals
   - Implement a fully functioning two-player chess game.
