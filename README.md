@@ -1,6 +1,6 @@
 # Moamen's Chess Game
 ## What is Chess Game?
-This is a project I'm working on for fun and to practice React, also I like chess :'D
+This is a project I'm working on for fun and to practice React.
 
 ## Goals
   - Implement a fully functioning two-player chess game.
@@ -14,7 +14,9 @@ This is a project I'm working on for fun and to practice React, also I like ches
 ## Features To Be Added:
   - Enforcing turns.
   - Different states of play i.e. normal state, check state, checkmate.
-  - Special Moves i.e. en passent, castling, and promotion.
+  - En Passant (holy hell!)
+  - Castling 
+  - Promotion
   - A user interface that contains:
     - Indicator for whose player's turn. 
     - A side panel that collects captured pieces.
